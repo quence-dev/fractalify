@@ -1,3 +1,9 @@
+# Default ignored files
+/shelf/
+/.idea
+# Editor-based HTTP Client requests
+/httpRequests/
+
 config.json
 .DS_Store
 node_modules/

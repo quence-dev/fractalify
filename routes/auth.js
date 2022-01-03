@@ -1,22 +1,15 @@
-/**
- * This is an example of a basic node.js script that performs
- * the Authorization Code oAuth2 flow to authenticate against
- * the Spotify Accounts.
- *
- * For more information, read
- * https://developer.spotify.com/web-api/authorization-guide/#authorization_code_flow
- */
-
-const express = require('express'); // Express web server framework
-const request = require('request'); // "Request" library
+const express = require('express');
+const router = express.Router();
+const request = require('request');
 const cors = require('cors');
 const querystring = require('querystring');
 const cookieParser = require('cookie-parser');
 const config = require('../config.json');
 
-const client_id = config.CLIENT_ID; // Your client id
-const client_secret = config.CLIENT_SECRET; // Your secret
-const redirect_uri = config.REDIRECT_URI; // Your redirect uri
+const client_id = config.CLIENT_ID;
+const client_secret = config.CLIENT_SECRET;
+const redirect_uri = config.REDIRECT_URI;
+const scope = config.SCOPE;
 
 /**
  * Generates a random string containing numbers and letters
@@ -35,20 +28,17 @@ const generateRandomString = function(length) {
 
 const stateKey = 'spotify_auth_state';
 
-const app = express();
+// router.use(express.static(__dirname + '/public'))
+router.use(cors())
+// router.use(cookieParser());
 
-app.use(express.static(__dirname + '/public'))
-   .use(cors())
-   .use(cookieParser());
-
-app.get('/login', function(req, res) {
+router.get('/login', function(req, res) {
 
   let state = generateRandomString(16);
   res.cookie(stateKey, state);
   console.log(redirect_uri);
 
   // your application requests authorization
-  const scope = 'user-read-private user-read-email';
   res.redirect('https://accounts.spotify.com/authorize?' +
     querystring.stringify({
       response_type: 'code',
@@ -59,7 +49,7 @@ app.get('/login', function(req, res) {
     }));
 });
 
-app.get('/callback', function(req, res) {
+router.get('/callback', function(req, res) {
 
   // your application requests refresh and access tokens
   // after checking the state parameter
@@ -121,7 +111,7 @@ app.get('/callback', function(req, res) {
   }
 });
 
-app.get('/refresh_token', function(req, res) {
+router.get('/refresh_token', function(req, res) {
 
   // requesting access token from refresh token
   const refresh_token = req.query.refresh_token;
@@ -144,3 +134,5 @@ app.get('/refresh_token', function(req, res) {
     }
   });
 });
+
+module.exports = router;
